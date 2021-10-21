@@ -1,13 +1,19 @@
 # Data libraries
-import pandas as pd
+import warnings
+
 import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+warnings.simplefilter("ignore")
 
 # We read in the data sets using pandas
+pd.set_option('display.max_columns', None)
 teams = pd.read_csv("teams.csv")
 results = pd.read_csv("results.csv")
 fixtures = pd.read_csv("fixtures.csv")
-# players = pd.read_csv("players.csv")
-# startingXI = pd.read_csv("startingXI.csv")
 odds = pd.read_csv("odds.csv")
 
 # It appears that the results data set only provides the number of goals scored by each team in each game.
@@ -54,3 +60,12 @@ season1_results = results[results.SeasonID == 1]
 season2_results = results[results.SeasonID == 2]
 
 print(season1_results.head())
+
+X = ['HomeTeamID', 'AwayTeamID']
+y = ['HomeWin', 'Draw', 'AwayWin']
+
+X_train, X_test, y_train, y_test = train_test_split(season1_results[X], season1_results[y])
+
+R = RandomForestClassifier()
+R.fit(X_train, y_train)
+print('Scor pentru setul de test: ', accuracy_score(y_test, R.predict(X_test)))
