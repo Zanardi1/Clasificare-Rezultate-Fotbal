@@ -1,11 +1,17 @@
 # Data libraries
 import warnings
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 warnings.simplefilter("ignore")
 
@@ -35,7 +41,7 @@ results['AwayWin'] = np.where(
     results['AwayScore'] > results['HomeScore'], 1, np.where(
         results['AwayScore'] == results['HomeScore'], 0, 0))
 
-print(results.head())
+print('Rezultate: \n', results.head(), '\n')
 
 # It would be helpful to have the team name in the data frame, as opposed to the team ID. We merge results with teams
 # data set to obtain this.
@@ -52,20 +58,41 @@ results.rename(columns={'TeamName': 'AwayTeamName'}, inplace=True)
 # Removing unnecessary variables
 results = results.drop(['HomeScore', 'AwayScore', 'HomeShots', 'AwayShots'], 1)
 
-print(results.head())
+print('Iar rezultate: \n', results.head(), ' \n')
 
 # We also split the results table into seasons 1 & 2
 # Spliting tables by seasons 1 & 2
 season1_results = results[results.SeasonID == 1]
 season2_results = results[results.SeasonID == 2]
 
-print(season1_results.head())
+print('Sezonul 1: \n', season1_results.head(), '\n')
+print('Sezonul 2: \n', season2_results.head(), '\n')
 
 X = ['HomeTeamID', 'AwayTeamID']
 y = ['HomeWin', 'Draw', 'AwayWin']
 
 X_train, X_test, y_train, y_test = train_test_split(season1_results[X], season1_results[y])
 
-R = RandomForestClassifier()
+R = RandomForestClassifier(n_estimators=1000)
 R.fit(X_train, y_train)
 print('Scor pentru setul de test: ', accuracy_score(y_test, R.predict(X_test)))
+
+KN = KNeighborsClassifier(n_neighbors=5)
+KN.fit(X_train, y_train)
+print('Scor pentru setul de test: ', accuracy_score(y_test, KN.predict(X_test)))
+
+DT = DecisionTreeClassifier(random_state=2, max_depth=15)
+DT.fit(X_train, y_train)
+print('Scor pentru setul de test: ', accuracy_score(y_test, DT.predict(X_test)))
+
+MLP = MLPClassifier(solver='sgd', random_state=3, hidden_layer_sizes=(40,), shuffle=True)
+MLP.fit(X_train, y_train)
+print('Scor pentru setul de test: ', accuracy_score(y_test, MLP.predict(X_test)))
+
+print(R.predict(season2_results[X]))
+print(season2_results[y])
+
+cm = confusion_matrix(season2_results[y].values.argmax(axis=1), R.predict(season2_results[X]).argmax(axis=1))
+disp = ConfusionMatrixDisplay(cm, display_labels=['Home Win', 'Draw', 'Away Win'])
+disp.plot()
+plt.show()
