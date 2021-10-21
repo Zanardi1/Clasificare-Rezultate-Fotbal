@@ -9,7 +9,6 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 warnings.simplefilter("ignore")
@@ -58,22 +57,24 @@ results = results.drop(['HomeScore', 'AwayScore', 'HomeShots', 'AwayShots'], 1)
 season1_results = results[results.SeasonID == 1]
 season2_results = results[results.SeasonID == 2]
 
+# Setting the features (X) and the outputs (y). The outcome of the match depends only on the teams that are playing it
+
 X = ['HomeTeamID', 'AwayTeamID']
 y = ['HomeWin', 'Draw', 'AwayWin']
 
+# Splitting the season 1 data in training and testing data
 X_train, X_test, y_train, y_test = train_test_split(season1_results[X], season1_results[y])
 
-R = RandomForestClassifier(n_estimators=1000)
+# Using a Random Forest Classifier as a classifier
+R = RandomForestClassifier(n_estimators=100)
 R.fit(X_train, y_train)
-print('Scor pentru setul de test: ', accuracy_score(y_test, R.predict(X_test)))
+print('Model''s accuracy for the test set: ', accuracy_score(y_test, R.predict(X_test)))
 
-DT = DecisionTreeClassifier(random_state=2, max_depth=15)
-DT.fit(X_train, y_train)
-print('Scor pentru setul de test: ', accuracy_score(y_test, DT.predict(X_test)))
-
+# Display the predicted outcomes and real for the second season
 print(R.predict(season2_results[X]))
 print(season2_results[y])
 
+# Creating and displaying the confusion matrix
 cm = confusion_matrix(season2_results[y].values.argmax(axis=1), R.predict(season2_results[X]).argmax(axis=1))
 disp = ConfusionMatrixDisplay(cm, display_labels=['Home Win', 'Draw', 'Away Win'])
 disp.plot()
