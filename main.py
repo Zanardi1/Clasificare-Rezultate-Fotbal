@@ -46,13 +46,11 @@ results.rename(columns={'TeamName': 'AwayTeamName'}, inplace=True)
 # Removing unnecessary variables
 results = results.drop(['HomeScore', 'AwayScore', 'HomeShots', 'AwayShots'], 1)
 
-print(results)
+print(results.head())
 
 # We also split the results table into seasons 1 & 2
 # Spliting tables by seasons 1 & 2
 season1_results = results[results.SeasonID == 1]
 season2_results = results[results.SeasonID == 2]
 
-print(season1_results)
-
-
+print(season1_results.head())
