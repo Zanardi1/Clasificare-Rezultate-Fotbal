@@ -10,17 +10,14 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 warnings.simplefilter("ignore")
 
 # We read in the data sets using pandas
-pd.set_option('display.max_columns', None)
 teams = pd.read_csv("teams.csv")
 results = pd.read_csv("results.csv")
 fixtures = pd.read_csv("fixtures.csv")
-odds = pd.read_csv("odds.csv")
 
 # It appears that the results data set only provides the number of goals scored by each team in each game.
 #
@@ -41,8 +38,6 @@ results['AwayWin'] = np.where(
     results['AwayScore'] > results['HomeScore'], 1, np.where(
         results['AwayScore'] == results['HomeScore'], 0, 0))
 
-print('Rezultate: \n', results.head(), '\n')
-
 # It would be helpful to have the team name in the data frame, as opposed to the team ID. We merge results with teams
 # data set to obtain this.
 # Merging `results` and `teams` dataframes to obtain team names
@@ -58,15 +53,10 @@ results.rename(columns={'TeamName': 'AwayTeamName'}, inplace=True)
 # Removing unnecessary variables
 results = results.drop(['HomeScore', 'AwayScore', 'HomeShots', 'AwayShots'], 1)
 
-print('Iar rezultate: \n', results.head(), ' \n')
-
 # We also split the results table into seasons 1 & 2
 # Spliting tables by seasons 1 & 2
 season1_results = results[results.SeasonID == 1]
 season2_results = results[results.SeasonID == 2]
-
-print('Sezonul 1: \n', season1_results.head(), '\n')
-print('Sezonul 2: \n', season2_results.head(), '\n')
 
 X = ['HomeTeamID', 'AwayTeamID']
 y = ['HomeWin', 'Draw', 'AwayWin']
@@ -77,17 +67,9 @@ R = RandomForestClassifier(n_estimators=1000)
 R.fit(X_train, y_train)
 print('Scor pentru setul de test: ', accuracy_score(y_test, R.predict(X_test)))
 
-KN = KNeighborsClassifier(n_neighbors=5)
-KN.fit(X_train, y_train)
-print('Scor pentru setul de test: ', accuracy_score(y_test, KN.predict(X_test)))
-
 DT = DecisionTreeClassifier(random_state=2, max_depth=15)
 DT.fit(X_train, y_train)
 print('Scor pentru setul de test: ', accuracy_score(y_test, DT.predict(X_test)))
-
-MLP = MLPClassifier(solver='sgd', random_state=3, hidden_layer_sizes=(40,), shuffle=True)
-MLP.fit(X_train, y_train)
-print('Scor pentru setul de test: ', accuracy_score(y_test, MLP.predict(X_test)))
 
 print(R.predict(season2_results[X]))
 print(season2_results[y])
